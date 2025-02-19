@@ -7,6 +7,8 @@
     <style>
         body {
             display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         #toc {
             position: fixed;
@@ -22,6 +24,7 @@
         #content {
             margin-left: 270px;
             padding: 20px;
+            max-width: 800px;
         }
         .toc-link {
             display: block;
@@ -32,6 +35,9 @@
         .toc-link.active {
             font-weight: bold;
             color: #007bff;
+        }
+        h1 {
+            scroll-margin-top: 80px;
         }
     </style>
 </head>
@@ -63,7 +69,7 @@
         <h1 id="partie4">L’utilisation d’une boucle afin de faciliter le traitement des données</h1>
         <p>De "L’utilisation d’une boucle afin de faciliter le traitement des données" à "Conclusion"...</p>
         
-        <h1 id="partie5">Conclusion</h1>
+        <h1 id=Conclusion>Conclusion</h1>
         <p>De "Conclusion" jusqu'à la fin...</p>
     </div>
     <script>
@@ -77,9 +83,9 @@
                     const targetId = this.getAttribute("href").substring(1);
                     const targetElement = document.getElementById(targetId);
                     if (targetElement) {
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 20,
-                            behavior: "smooth"
+                        targetElement.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
                         });
                     }
                 });
@@ -89,7 +95,7 @@
                 let fromTop = window.scrollY;
                 sections.forEach(section => {
                     const link = document.querySelector(`a[href='#${section.id}']`);
-                    if (section.offsetTop <= fromTop + 50 && section.offsetTop + section.offsetHeight > fromTop) {
+                    if (section.offsetTop <= fromTop + 100 && section.offsetTop + section.offsetHeight > fromTop) {
                         link.classList.add("active");
                     } else {
                         link.classList.remove("active");

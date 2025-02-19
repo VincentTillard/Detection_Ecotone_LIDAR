@@ -1,0 +1,309 @@
+---
+title: ""
+author: ""
+date: ""
+format: html
+self-contained: true
+---
+
+# **DETECTION DES ECOTONES PAR LES DONNEES LIDAR**
+
+Le projet qui nous a été confié était d’analyser les écotones et d’en distinguer différents types en utilisant les données LIDAR, principalement sur le parc régional des Pyrénées Ariégeoises.
+
+Nous avons téléchargé les données LIDAR sur Géoservices, pour ensuite passer à l'analyse de ces données. Après de nombreux tests sur QGIS, nous nous sommes principalement concentrés sur RStudio et le package `lidR`, nous rendant compte qu’il offrait une analyse plus pertinente de ces données.
+
+Le package **lidR** pour R est une puissante boîte à outils dédiée à la manipulation et à l'analyse des données LIDAR, traitant des nuages de points 3D. Il permet de lire, visualiser, filtrer, segmenter et classifier ces données géospatiales. Il offre des fonctionnalités avancées comme la génération de modèles numériques de terrain (MNT), la détection des cimes d’arbres, ou encore l'extraction de métriques de la canopée. La documentation complète du package est disponible dans le **lidRbook**, qui explique chaque fonctionnalité avec des exemples clairs.
+
+
+# Découverte sur QGIS
+
+On a tout d'abord commencé à analyser les données LIDAR sur QGIS. En effet, on peut se rendre compte de l'écotone en réalisant un modèle numérique de terrain normalisé (différence d'altitude entre le sol et la hauteur des végétaux) :
+
+![Modèle Numérique de Terrain Normalisé](C:\Users\tilla\OneDrive\Images\1024-499 (1).jpg)
+
+Malheureusement, le rendu n'est pas comme espéré, de nombreux artéfacts empêchent d'avoir une bonne lecture, même si nous pouvons distinguer l'écotone.
+
+
+# Découverte sur RStudio
+
+Dans un premier temps, nous avons découvert `lidR` et les différents packages qui y sont associés. Nous avons consulté les différentes documentations de ce package pour mieux le comprendre et découvrir les analyses possibles.
+
+
+## Installation des packages :
+
+```r
+install.packages('devtools')
+install.packages('ggplot2')
+install.packages('lidR')
+```
+
+Une fois installés, il faut les activer :
+
+```r
+library(ggplot2)
+library(lidR)
+library(devtools)
+```
+
+Ensuite, j'ai importé les tuiles LIDAR que je trouvais pertinentes à analyser :
+
+```r
+Tuile1 <- readLAS("fichier")
+Tuile1
+Tuile2 <- readLAS("fichier")
+Tuile2
+```
+
+Pour vérifier qu'il n'y a pas d'erreurs dans les fichiers LAS ou LAZ, il est recommandé de les vérifier grâce à cette commande :
+
+```r
+las_check(Tuile2)
+las_check(Tuile1)
+```
+
+On peut directement afficher les données brutes LIDAR :
+
+```r
+plot(Tuile1, bg = "white", axis = TRUE, legend = TRUE)
+```
+
+![Représentation des données brutes](C:\Users\tilla\OneDrive\Images\1024-462.jpg)
+
+
+## Représentation de la surface et de la hauteur végétale
+
+On peut représenter seulement le sol végétalisé. Pour cela, il faut différencier le "végétal" du "non-végétal", ce qui est possible grâce à cette ligne de code :
+
+```r
+nonveg <- filter_poi(Tuile1, Classification != LASHIGHVEGETATION)
+veg <- filter_poi(Tuile1, Classification == LASHIGHVEGETATION)
+```
+
+Une fois les catégories "végétales" et "non-végétales" créées, on peut écrire ce code pour représenter le sol végétal :
+
+```r
+x <- plot(nonveg, color = "Classification", bg = "white", size = 3)
+plot(veg, add = x)
+```
+
+![Représentation du sol végétal et de la hauteur des végétaux](C:\Users\tilla\OneDrive\Images\1024-560.jpg)
+
+On voit bien la couverture du sol végétalisé et également la hauteur des végétaux. Cependant, l'affichage de la hauteur représentée par une couleur allant du bleu au rouge n'est pas optimal, car l'écotone étant sur un versant, cela limite la lecture de la représentation. Il y a un dénivelé de quasiment 300 m sur cette représentation. Le sol n'étant pas sur une surface plane, la représentation de la hauteur des végétaux avec cette méthode est donc compliquée.
+
+
+# Détection et segmentation des arbres
+
+Dans un second temps, nous nous sommes concentrés sur la détection d'arbres individuels (processus de localisation spatiale des arbres et d'extraction d'informations sur la hauteur) et sur la segmentation des arbres individuels (processus de délimitation individuelle des arbres détectés). Dans RStudio avec le package `lidR`, les fonctions de détection et de segmentation sont découplées pour maximiser la flexibilité. La cime des arbres est d'abord détectée à l'aide de la fonction `Locate_trees()`.
+
+
+## Représentation de la hauteur des arbres
+
+Le package `lidR` nous permet de calculer la hauteur des arbres et ensuite de la représenter en fonction de leur hauteur. Pour commencer, on peut localiser les arbres en fonction de leur hauteur, par exemple ceux de 3 m et moins, et ceux entre 3 et 11 m :
+
+```r
+ttops_3m <- locate_trees(Tuile2, lmf(ws = 3))
+ttops_11m <- locate_trees(Tuile2, lmf(ws = 11))
+```
+
+On peut ensuite générer une représentation graphique de ces arbres :
+
+```r
+par(mfrow=c(1,2))
+plot(chm, col = height.colors(50))
+plot(sf::st_geometry(ttops_3m), add = TRUE, pch = 3)
+plot(chm, col = height.colors(50))
+plot(sf::st_geometry(ttops_11m), add = TRUE, pch = 3)
+```
+
+![Arbre de 3 m et moins et entre 3 et 11 m](C:\Users\tilla\OneDrive\Images\849-335-max.jpg)
+
+
+## Représentation de la hauteur des arbres en 3D
+
+Nous avons ensuite essayé de représenter la hauteur des arbres en 3D pour mieux distinguer l'écotone. Cela est possible avec le code suivant :
+
+```r
+LASfile <- system.file("extdata", "MixedConifer.laz", package="lidR")
+Las <- readLAS(LASfile, select = "xyzr", filter = "-drop_z_below 0")
+chm <- rasterize_canopy(Tuile2, 0.5, pitfree(subcircle = 0.2))
+plot(Tuile2, bg = "white", size = 4)
+```
+
+![Hauteur des arbres en 3D](C:\Users\tilla\OneDrive\Images\845-909-max.jpg)
+
+Malheureusement, nous avons rencontré un problème : des points se retrouvent en-dessous et au-dessus du regroupement de points, ce qui rend la représentation obsolète. Après de nombreuses recherches, nous n'avons pas trouvé de boucle pour résoudre ce problème.
+
+
+## Détection de la cyme des arbres  
+
+Une des fonctionnalitées très intéressantes du package lidR est la détection des cimes d'arbres. En effet, la cime des arbres peut être détectée en appliquant un filtre maximum local (LMF) sur l'ensemble de données chargé. D'après les différentes documentation que nous avons pu lire, le LMF de lidR est basé sur un nuage de points, ce qui signifie qu'il trouve la cime des arbres à partir du nuage de points sans utiliser de raster. Le traitement est cependant en réalité très similaire. Pour un point donné, l'algorithme analyse les points du voisinage, vérifiant si le point traité est le plus haut.
+
+Nous pouvons donc détecter les cimes d'arbres grâce au code suivant : 
+
+```r
+ttops <- locate_trees(Tuile2, lmf(ws = 5))plot(chm, col = height.colors(50))
+plot(sf::st_geometry(ttops), add = TRUE, pch = 3)
+```
+![Cimes des arbres sur la zone étudiée](C:\Users\tilla\OneDrive\Images\686-413-max.jpg)
+
+On voit que la représentation est intéressante, en effet les coordonnées x et y permettent de se situer au sein de la représentation ainsi que l'altitude en arrière plan.
+
+
+## Détection de la cyme des arbres en 3D
+
+On peut également détecter les cimes d'arbres en 3D avec le code suivant : 
+
+```r
+x <- plot(Tuile2, bg = "white", size = 4)
+add_treetops3d(x, ttops)
+```
+![Cimes des arbres représentées en 3D](C:\Users\tilla\OneDrive\Images\915-626-max.jpg)
+
+
+# L'utilisation d'une boucle afin de faciliter le traitement des données
+
+L'utilisation d'une boucle sur Rstudio pour manipuler tous les fichiers .laz dans un dossier présente un intérêt majeur pour automatiser le traitement des données LIDAR, en particulier lorsque l'on travaille avec un grand volume de fichiers. Cette approche permet d'appliquer de manière systématique les mêmes opérations à chaque fichier, comme l'extraction de métriques ou la visualisation de la structure tranversale en 2D des nuages de points. En enregistrant ensuite les graphiques générés au format PNG dans un dossier dédié, on centralise les résultats de manière ordonnée, facilitant ainsi leur consultation, leur comparaison ou leur intégration dans des rapports. Cette automatisation améliore l'efficacité, réduit le risque d'erreur humaine et garantit une reproductibilité des analyses.
+
+
+## Installation des packages nécessaires :
+
+```r
+install.packages("lidR")
+install.packages("ggplot2")
+```
+
+Le package lidR sert à manipuler les données et le package ggplot2 sert à générer des graphiques en 2D
+
+
+## Etape 1 : lister tous les fichiers LAS présente dans le dossier
+
+```r
+fichiers_las <- list.files(path = "D:/licence_pro_sigdat/Thierry_Feuillet_Analyse_spatiale/Projet_Ecotone LIDAR/Laz/",
+pattern = "\\.copc\\.laz$", 
+full.names = TRUE)
+```
+
+L'utilisation de list.files() sert à récupérer tous les fichiers avec l'extension .las dans le dossier spécifié.
+
+Le paramètre full.names =  TRUE renvoie les chemins complets pour chaque fichier.
+
+
+## Etape 2 : début de la boucle pour traiter chaque fichier LAS
+
+```r
+for (fichier in fichiers_las) {
+  cat("Traitement du fichier :", fichier, "\n")
+```
+
+Dans cet exemple, cat affiche une ligne dans la console indiquant le fichier en cours de traitement. Cela permet de suivre la progression de la boucle afin de suivre à quel moment chaque fichier est traité. Si une erreur survient, on sait sur quel fichier elle se produit facilitant le débogage.
+
+
+## Etape 3 : chargement du fichier LAS
+
+```r
+  las <- readLAS(fichiers_las)
+```
+
+La fonction readLAS() charge les données LIDAR à partir d'un fichier LAS
+
+Une erreur a été rencontré suite à l'utilisations de certains fichiers de nuages de points, std::bad_alloc obtenu en essayant de charger un fichier LAS avec la fonction readLAS() indique un problème de mémoire. Cela signifie que le programme essaie d'allouer plus de mémoire qu'il n'en est disponible sur la machine. Pour résoudre ce problème, il est possible de diminuer la taille du fichier en le chargeant en morceaux avec un filter.
+
+Il est nécessaire de vérifier si le fichier est valide, si le fichier est invalide (vide ou corrompu), la variable las sera NULL
+
+```r
+if (is.null(las)) {
+    cat("Erreur lors du chargement du fichier :", fichier, "\n") 
+    next #
+  }
+```
+
+Le next permet de passer au fichier suivant dans la boucle.
+
+Une première étape est importante dans le traitement des données et consiste à s'assurer que les données sont complètes et valides.  las_check() est une fonction permettant d'effectuer une inspection approfondie des objets LAS. Cette fonction vérifie si un objet LAS répond aux spécifications ASPRS LAS et s'il est valide pour le traitement, en émettant des avertissements si ce n'est pas le cas. Il peut être invalide si il contient des points en double, entrainant un problème tel que les arbres détectés deux fois.
+
+```r
+las_check(las)
+```
+
+
+## Étape 4 : Extraire les coordonnées de la bounding box (bbox)
+
+```r
+bbox <- st_bbox(las)
+```
+
+La fonction st_bbox renvoie un objet contenant les coordonnées xmin, ymin, xmax et ymax.
+
+```r
+xmin <- bbox["xmin"] # Coordonnée minimale en X
+ymin <- bbox["ymin"] # Coordonnée minimale en Y
+xmax <- bbox["xmax"] # Coordonnée maximale en X
+ymax <- bbox["ymax"] # Coordonnée maximale en Y
+```
+
+
+## Étape 5 : Définir les points p1 et p2 pour la coupe transversale
+
+```r
+p1 <- c(xmin, ymin)
+p2 <- c(xmax, ymax)
+```
+
+Le point p1 est défini à partir de xmin et ymin (coin inférieur gauche).  
+Le point p2 est défini à partir de xmax et ymax (coin supérieur droit).
+
+
+## Étape 6 : Effectuer une coupe transversale
+
+```r
+las_tr <- clip_transect(las, p1, p2, width = 5, xz = TRUE)
+```
+
+La fonction clip_transect() découpe une section transversale des points entre p1 et p2, donc une ligne du coin inférieur gauche jusqu'au coin supérieur droit  
+Le paramètre width = 5 définit la largeur de la coupe.  
+Le paramètre xz = TRUE indique que nous travaillons dans un plan XZ (2D).
+
+
+## Étape 7 : Générer un graphique en 2D de la coupe transversale
+
+```r
+plot <- ggplot(payload(las_tr), aes(X, Z, color = Z)) +
+geom_point(size = 0.5) + 
+coord_equal() + 
+theme_minimal() +
+scale_color_gradientn(colours = height.colors(50)) + 
+ggtitle(paste("Coupe transversale :", basename(fichier)))
+```
+
+ggplot() est utilisé pour visualiser les points.  
+aes(X, Z, color = Z)\` utilise les coordonnées X et Z pour positionner les points, avec Z comme couleur. geom_point() permet de dessiner les points avec une taille de 0.5.  
+scale_color_gradient() permet le dégradé de couleur en fonction de la hauteur (z).  
+Enfin le ggtitle permet de mettre un titre commençant par "coupe transversale" et avec le nom du fichier.
+
+
+## Étape 8 : Afficher le graphique dans la console
+
+```r
+print(plot)
+```
+
+Affiche le rendu de la coupe transversale dans la console.
+
+
+## Étape 9 (optionnelle) : Sauvegarder le graphique sous forme d'image PNG
+
+```r
+ggsave(filename = paste0("D:/licence_pro_sigdat/Thierry_Feuillet_Analyse_spatiale/Projet_Ecotone LIDAR/image.png_des_résultats_boucle/output_",
+tools::file_path_sans_ext(basename(fichier)), ".png"),
+plot = plot, width = 10, height = 5)
+}
+```
+
+Le ggsave() sauvegarde le rendu 2D en format PNG, dans un dossier avec un nom basé sur le fichier LAS.
+![Coupe transversale](C:\Users\tilla\OneDrive\Images\906-553-max.png)
+
+
+# Conclusion
+
+L’utilisation d’une boucle sur **RStudio** pour manipuler tous les fichiers `.laz` dans un dossier présente un intérêt majeur pour automatiser le traitement des données LIDAR. Cette approche permet d’appliquer les mêmes opérations à chaque fichier, comme le découpage en sections transversales ou l’extraction de métriques, améliorant l’efficacité et garantissant une reproductibilité des analyses.
+---

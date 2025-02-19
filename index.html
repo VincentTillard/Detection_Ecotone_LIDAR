@@ -1,40 +1,87 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Table des matières</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table des Matières</title>
+    <style>
+        body {
+            display: flex;
+        }
+        #toc {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+            background: #f4f4f4;
+            padding: 10px;
+            border-right: 1px solid #ddd;
+        }
+        #content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+        .toc-link {
+            display: block;
+            margin: 5px 0;
+            text-decoration: none;
+            color: #333;
+        }
+        .toc-link.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
 </head>
 <body>
-  <h1>Bienvenue sur ma page</h1>
+    <nav id="toc">
+        <h3>Table des Matières</h3>
+        <ul id="toc-list"></ul>
+    </nav>
+    <div id="content">
+        <h1 id="intro">Introduction</h1>
+        <p>Contenu de l'introduction...</p>
+        <h2 id="section1">Section 1</h2>
+        <p>Contenu de la section 1...</p>
+        <h2 id="section2">Section 2</h2>
+        <p>Contenu de la section 2...</p>
+        <h3 id="subsection2-1">Sous-section 2.1</h3>
+        <p>Contenu de la sous-section 2.1...</p>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const tocList = document.getElementById("toc-list");
+            const headings = document.querySelectorAll("#content h1, #content h2, #content h3");
+            
+            headings.forEach(heading => {
+                const link = document.createElement("a");
+                link.href = "#" + heading.id;
+                link.textContent = heading.textContent;
+                link.classList.add("toc-link");
+                
+                const listItem = document.createElement("li");
+                listItem.appendChild(link);
+                tocList.appendChild(listItem);
+            });
 
-  <!-- Table des matières -->
-  <div id="toc">
-    <h2>Table des matières</h2>
-    <ul>
-      <li><a href="#section1">Section 1 : Introduction</a></li>
-      <li><a href="#section2">Section 2 : Détails</a></li>
-      <li><a href="#section3">Section 3 : Conclusion</a></li>
-    </ul>
-  </div>
-
-  <!-- Sections -->
-  <section id="section1">
-    <h2>Section 1 : Introduction</h2>
-    <p>Voici le contenu de la première section.</p>
-  </section>
-
-  <section id="section2">
-    <h2>Section 2 : Détails</h2>
-    <p>Voici le contenu de la deuxième section.</p>
-  </section>
-
-  <section id="section3">
-    <h2>Section 3 : Conclusion</h2>
-    <p>Voici le contenu de la troisième section.</p>
-  </section>
+            window.addEventListener("scroll", () => {
+                let fromTop = window.scrollY;
+                headings.forEach(heading => {
+                    const link = document.querySelector(`a[href='#${heading.id}']`);
+                    if (heading.offsetTop <= fromTop + 50 && heading.offsetTop + heading.offsetHeight > fromTop) {
+                        link.classList.add("active");
+                    } else {
+                        link.classList.remove("active");
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
+
 
 
 <title>Detection Ecotone LIDAR</title>

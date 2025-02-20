@@ -1,12 +1,112 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table des Matières Interactive</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+        }
+        #toc {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+            background: #f4f4f4;
+            padding: 10px;
+            border-right: 1px solid #ddd;
+        }
+        #content {
+            margin-left: 270px;
+            padding: 20px;
+            max-width: 800px;
+            text-align: center;
+        }
+        .toc-link {
+            display: block;
+            margin: 5px 0;
+            text-decoration: none;
+            color: #333;
+        }
+        .toc-link.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+        h1 {
+            scroll-margin-top: 80px;
+        }
+    </style>
+</head>
+<body>
+    <nav id="toc">
+        
+        <ul id="toc-list">
+            <li><a href="#introduction" class="toc-link">Introduction</a></li>
+            <li><a href="#partie1" class="toc-link">Partie 1 : Découverte QGIS</a></li>
+            <li><a href="#partie2" class="toc-link">Partie 2 : Découverte RStudio</a></li>
+            <li><a href="#partie3" class="toc-link">Partie 3 : Détection et segmentation des arbres</a></li>
+            <li><a href="#partie4" class="toc-link">Partie 4 : L’utilisation d’une boucle</a></li>
+            <li><a href="#partie5" class="toc-link">Partie 5 : Conclusion</a></li>
+        </ul>
+    </nav>
+    <div id="content">
+        <h1 id="introduction">Introduction</h1>
+        <p>Texte avant "Découverte sur QGIS"...</p>
+        
+        <h1 id="partie1">Découverte QGIS</h1>
+        <p>De "Découverte sur QGIS" à "Découverte sur R"...</p>
+        
+        <h1 id="partie2">Découverte RStudio</h1>
+        <p>De "Découverte sur RStudio" à "Détection et segmentation des arbres"...</p>
+        
+        <h1 id="partie3">Détection et segmentation des arbres</h1>
+        <p>De "Détection et segmentation des arbres" à "L’utilisation d’une boucle afin de faciliter le traitement des données"...</p>
+        
+        <h1 id="partie4">L’utilisation d’une boucle afin de faciliter le traitement des données</h1>
+        <p>De "L’utilisation d’une boucle afin de faciliter le traitement des données" à "Conclusion"...</p>
+        
+        <h1 id="partie5">Conclusion</h1>
+        <p>De "Conclusion" jusqu'à la fin...</p>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const tocLinks = document.querySelectorAll(".toc-link");
+            const sections = document.querySelectorAll("#content h1");
+            
+            tocLinks.forEach(link => {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    const targetId = this.getAttribute("href").substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 20,
+                            behavior: "smooth"
+                        });
+                    }
+                });
+            });
+            
+            window.addEventListener("scroll", () => {
+                let fromTop = window.scrollY;
+                sections.forEach(section => {
+                    const link = document.querySelector(`a[href='#${section.id}']`);
+                    if (section.offsetTop <= fromTop + 100 && section.offsetTop + section.offsetHeight > fromTop) {
+                        link.classList.add("active");
+                    } else {
+                        link.classList.remove("active");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
 
-<meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
-<meta name="author" content>
             
 
 

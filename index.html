@@ -3,108 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Table des Matières</title>
+    <title>Table des Matières Flottante</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 40px;
+            margin: 0;
+            padding: 0;
         }
-        h1, h2, h3 {
-            color: #007bff;
-        }
-        pre {
-            background: #f4f4f4;
+        #toc {
+            position: fixed;
+            left: -220px; /* Caché par défaut */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 200px;
+            background: rgba(244, 244, 244, 0.9);
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 10px;
+            transition: left 0.3s;
         }
-        .toc {
-            background: #f8f9fa;
-            padding: 15px;
-            border-left: 4px solid #007bff;
+        #toc:hover {
+            left: 0; /* Réapparaît au survol */
+        }
+        .toc-link {
+            display: block;
+            margin: 5px 0;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            padding: 5px;
+        }
+        .toc-link:hover {
+            color: #007bff;
+            font-weight: bold;
+        }
+        #content {
+            margin: 20px;
+            max-width: 800px;
+        }
+        h1 {
+            scroll-margin-top: 80px;
         }
     </style>
 </head>
 <body>
-    <h1>Table des Matières</h1>
-    <div class="toc">
+    <nav id="toc">
         <ul>
-            <li><a href="#detection-ecotones">Détection des écotones par les données LIDAR</a></li>
-            <li><a href="#decouverte-qgis">Découverte sur QGIS</a>
-                <ul>
-                    <li><a href="#mnt-normalise">Modèle Numérique de Terrain Normalisé</a></li>
-                </ul>
-            </li>
-            <li><a href="#decouverte-rstudio">Découverte sur RStudio</a>
-                <ul>
-                    <li><a href="#installation-packages">Installation des packages</a></li>
-                    <li><a href="#import-verif">Importation et vérification des fichiers LIDAR</a></li>
-                </ul>
-            </li>
-            <li><a href="#detection-segmentation">Détection et segmentation des arbres</a></li>
-            <li><a href="#utilisation-boucle">Utilisation d'une boucle pour automatiser</a></li>
-            <li><a href="#conclusion">Conclusion</a></li>
+            <li><a href="#introduction" class="toc-link">Introduction</a></li>
+            <li><a href="#partie1" class="toc-link">Partie 1 : Découverte QGIS</a></li>
+            <li><a href="#partie2" class="toc-link">Partie 2 : Découverte RStudio</a></li>
+            <li><a href="#partie3" class="toc-link">Partie 3 : Détection et segmentation des arbres</a></li>
+            <li><a href="#partie4" class="toc-link">Partie 4 : L’utilisation d’une boucle</a></li>
+            <li><a href="#partie5" class="toc-link">Partie 5 : Conclusion</a></li>
         </ul>
+    </nav>
+    <div id="content">
+        <h1 id="introduction">Introduction</h1>
+        <p>Le projet qui nous a été confié...</p>
+        
+        <h1 id="partie1">Découverte QGIS</h1>
+        <p>On a tout d’abord commencé...</p>
+        
+        <h1 id="partie2">Découverte RStudio</h1>
+        <p>Dans un premier temps...</p>
+        
+        <h1 id="partie3">Détection et segmentation des arbres</h1>
+        <p>Nous nous sommes concentrés...</p>
+        
+        <h1 id="partie4">L’utilisation d’une boucle</h1>
+        <p>L’utilisation d’une boucle sur RStudio...</p>
+        
+        <h1 id="partie5">Conclusion</h1>
+        <p>En utilisant différentes techniques...</p>
     </div>
-
-    <h2 id="detection-ecotones">1. Détection des écotones par les données LIDAR</h2>
-    <p>Le projet qui nous a été confié était d’analyser les écotones et d’en distinguer différents types en utilisant les données LIDAR, principalement sur le parc régional des Pyrénées Ariégeoises.</p>
-    <p>Nous avons téléchargé les données LIDAR sur Géoservices, pour ensuite passer à l’analyse de ces données...</p>
-
-    <h2 id="decouverte-qgis">2. Découverte sur QGIS</h2>
-    <p>On a tout d’abord commencé à analyser les données LIDAR sur QGIS...</p>
-    <h3 id="mnt-normalise">Modèle Numérique de Terrain Normalisé</h3>
-    <p>Malheureusement, le rendu n’est pas comme espéré...</p>
-
-    <h2 id="decouverte-rstudio">3. Découverte sur RStudio</h2>
-    <p>Dans un premier temps, nous avons découvert lidR et les différents packages qui y sont associés...</p>
-    <h3 id="installation-packages">Installation des packages</h3>
-    <pre><code>install.packages('devtools')
-install.packages('ggplot2')
-install.packages('lidR')</code></pre>
-    <h3 id="import-verif">Importation et vérification des fichiers LIDAR</h3>
-    <pre><code>Tuile1 <- readLAS("fichier")
-Tuile2 <- readLAS("fichier")
-las_check(Tuile1)
-las_check(Tuile2)</code></pre>
-
-    <h2 id="detection-segmentation">4. Détection et segmentation des arbres</h2>
-    <p>Nous nous sommes concentrés sur la détection d’arbres individuels...</p>
-    <pre><code>ttops_3m <- locate_trees(Tuile2, lmf(ws = 3))
-ttops_11m <- locate_trees(Tuile2, lmf(ws = 11))</code></pre>
-
-    <h2 id="utilisation-boucle">5. Utilisation d'une boucle pour automatiser</h2>
-    <p>L’utilisation d’une boucle sur RStudio pour manipuler tous les fichiers .laz dans un dossier présente un intérêt majeur...</p>
-    <pre><code>fichiers_las <- list.files(path = "D:/licence_pro_sigdat/.../Laz/", pattern = "\\.copc\\.laz$", full.names = TRUE)
-for (fichier in fichiers_las) {
-    cat("Traitement du fichier :", fichier, "\n")
-    las <- readLAS(fichier)
-    if (is.null(las)) {
-        cat("Erreur lors du chargement du fichier :", fichier, "\n")
-        next
-    }
-    las_check(las)
-    bbox <- st_bbox(las)
-    xmin <- bbox["xmin"]
-    ymin <- bbox["ymin"]
-    xmax <- bbox["xmax"]
-    ymax <- bbox["ymax"]
-    p1 <- c(xmin, ymin)
-    p2 <- c(xmax, ymax)
-    las_tr <- clip_transect(las, p1, p2, width = 5, xz = TRUE)
-    plot <- ggplot(payload(las_tr), aes(X, Z, color = Z)) +
-        geom_point(size = 0.5) +
-        coord_equal() +
-        theme_minimal() +
-        scale_color_gradientn(colours = height.colors(50)) +
-        ggtitle(paste("Coupe transversale :", basename(fichier)))
-    print(plot)
-    ggsave(filename = paste0("D:/licence_pro_sigdat/.../output_", tools::file_path_sans_ext(basename(fichier)), ".png"), plot = plot, width = 10, height = 5)
-}</code></pre>
-
-    <h2 id="conclusion">6. Conclusion</h2>
-    <p>En utilisant différentes techniques et outils comme QGIS et RStudio avec lidR, nous avons pu analyser les écotones et en tirer des conclusions pertinentes...</p>
+    <script>
+        document.querySelectorAll(".toc-link").forEach(link => {
+            link.addEventListener("click", function(event) {
+                event.preventDefault();
+                const targetId = this.getAttribute("href").substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 20,
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
+
 
 
 

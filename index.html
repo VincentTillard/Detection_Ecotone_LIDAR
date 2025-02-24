@@ -3,50 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Table des Matières Flottante</title>
+    <title>Table des Matières</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
+            max-width: 800px;
+            text-align: justify;
         }
         #toc {
-            position: fixed;
-            left: -220px; /* Caché par défaut */
-            top: 50%;
-            transform: translateY(-50%);
-            width: 200px;
             background: rgba(244, 244, 244, 0.9);
             padding: 10px;
             border-radius: 10px;
-            transition: left 0.3s;
-        }
-        #toc:hover {
-            left: 0; /* Réapparaît au survol */
+            border: 1px solid #ddd;
+            width: fit-content;
+            margin: auto;
         }
         .toc-link {
             display: block;
             margin: 5px 0;
             text-decoration: none;
             color: #333;
-            font-size: 14px;
+            font-size: 16px;
             padding: 5px;
         }
         .toc-link:hover {
             color: #007bff;
             font-weight: bold;
         }
-        #content {
-            margin: 20px;
-            max-width: 800px;
-        }
-        h1 {
-            scroll-margin-top: 80px;
-        }
     </style>
 </head>
 <body>
     <nav id="toc">
+        <h2>Table des Matières</h2>
         <ul>
             <li><a href="#introduction" class="toc-link">Introduction</a></li>
             <li><a href="#partie1" class="toc-link">Partie 1 : Découverte QGIS</a></li>
@@ -56,48 +46,8 @@
             <li><a href="#partie5" class="toc-link">Partie 5 : Conclusion</a></li>
         </ul>
     </nav>
-    <div id="content">
-        <h1 id="introduction"></h1>
-        <p></p>
-        
-        <h1 id="partie1"></h1>
-        <p></p>
-        
-        <h1 id="partie2"></h1>
-        <p></p>
-        
-        <h1 id="partie3"></h1>
-        <p></p>
-        
-        <h1 id="partie4"></h1>
-        <p></p>
-        
-        <h1 id="partie5"></h1>
-        <p></p>
-    </div>
-    <script>
-        document.querySelectorAll(".toc-link").forEach(link => {
-            link.addEventListener("click", function(event) {
-                event.preventDefault();
-                const targetId = this.getAttribute("href").substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 20,
-                        behavior: "smooth"
-                    });
-                }
-            });
-        });
-    </script>
 </body>
 </html>
-
-
-
-
-
-
             
 
 
